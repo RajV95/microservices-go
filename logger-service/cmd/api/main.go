@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"log"
 	"log-service/data"
+	"net"
 	"net/http"
+	"net/rpc"
 	"time"
 
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -50,8 +52,11 @@ func main() {
 		Models: data.New(client),
 	}
 
+	// register the rpc server
+	err = rpc.Register(new(RPCServer))
+	go app.rpcListen()
+
 	// start webserve
-	// go app.serve()
 	log.Println("Starting Service on Port", webPort)
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%s", webPort),
@@ -64,15 +69,32 @@ func main() {
 	}
 }
 
-func (app *Config) serve() {
-	srv := &http.Server{
-		Addr:    fmt.Sprintf(":%s", webPort),
-		Handler: app.routes(),
+// rpcListen starts an RPC server that listens for remote procedure calls
+// It accepts connections and handles them asynchronously using Go's net/rpc package
+func (app *Config) rpcListen() error {
+	log.Println("Starting RPC Server on port : ", rpcPort)
+
+	// Create a TCP listener on all interfaces (0.0.0.0) and the specified RPC port
+	listen, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%s", rpcPort))
+	if err != nil {
+		return err
 	}
 
-	err := srv.ListenAndServe()
-	if err != nil {
-		log.Panic(err)
+	// Ensure the listener is closed when the function exits
+	defer listen.Close()
+
+	// Infinite loop to continuously accept incoming RPC connections
+	for {
+		// Accept a new connection from a client
+		rpcConn, err := listen.Accept()
+		if err != nil {
+			// If there's an error accepting, skip this iteration and continue listening
+			continue
+		}
+
+		// Handle the connection in a separate goroutine to allow concurrent requests
+		// ServeConn blocks until the client disconnects
+		go rpc.ServeConn(rpcConn)
 	}
 }
 
