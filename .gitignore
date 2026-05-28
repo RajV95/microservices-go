@@ -12,6 +12,7 @@ mailerApp
 loggerServiceApp
 brokerApp
 authApp
+listenerApp
 
 bin/
 build/
