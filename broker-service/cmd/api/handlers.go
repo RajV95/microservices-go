@@ -272,7 +272,7 @@ func (app *Config) LogItemViaRPC(w http.ResponseWriter, l LogPayload) {
 func (app *Config) LogViaGRPC(w http.ResponseWriter, r *http.Request) {
 	var requestPayload RequestPayload
 
-	err := app.readJSON(w, r, requestPayload)
+	err := app.readJSON(w, r, &requestPayload)
 	if err != nil {
 		app.errorJSON(w, err)
 		return
