@@ -15,6 +15,12 @@ services:
       mode: replicated
       replicas: 1
   
+  frontend:
+    image: tsawler/front-end:1.0.0
+    deploy:
+      mode: replicated
+      replicas: 1
+
   authentication-service:
     image: tsawler/authentication-service:1.0.0
     deploy:
