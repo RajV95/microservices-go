@@ -26,7 +26,7 @@ spec:
           - name: MAIL_DOMAIN
             value: ""
           - name: MAIL_HOST
-            value: "localhost"
+            value: "mailhog"
           - name: MAIL_PORT
             value: "1025"
           - name: MAIL_ENCRYPTION
